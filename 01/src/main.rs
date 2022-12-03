@@ -21,5 +21,11 @@ fn main() {
         }
     }
 
-    println!("max {}", max)
+    let mut sums: Vec<i32> = inventory.iter().map(|elf| elf.iter().sum()).collect();
+    sums.sort();
+    sums.reverse();
+    let top_three: i32 = sums[0..3].iter().sum();
+
+    println!("max {}", max);
+    println!("top three {}", top_three);
 }
