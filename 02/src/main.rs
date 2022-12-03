@@ -50,6 +50,9 @@
 // C X => C B => 0 + 2 => 2
 // C Y => C C => 3 + 3 => 6
 // C Z => C A => 6 + 1 => 7
+//
+// The scary thing is I want to go back and actually do this problem
+// without shortcutting anything because there's only 9 output states.
 
 use std::collections::HashMap;
 //use std::io::prelude::*;
