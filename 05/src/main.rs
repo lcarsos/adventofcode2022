@@ -25,11 +25,11 @@ where
     }
 
 
-    return vec!(vec!('a','b'));
+    return Some(vec!(vec!('a','b')));
 }
 
 fn main() {
-    let mut foo = parse_crates(&mut stdin().lock())?;
+    let mut foo = parse_crates(&mut stdin().lock()).unwrap();
     //for line in stdin().lock().lines() {
     //}
     println!("Hello, world!");
