@@ -6,17 +6,32 @@ where
     R: BufRead,
 {
     let mut buffer = vec![0; 5];
+    let mut depot = vec![vec![b' '; 9]; 9];
+    let mut scanlines = vec![vec![b' '; 9; 9];
+    let mut stack = 0;
+    let mut row = 0;
 
     let mut handle = stream.take(3);
     handle.read(&mut buffer).unwrap();
-    if buffer[1] == 32 {
-        println!("found space");
+    match buffer [1] {
+        b' ' => {
+            stack += 1;
+            println!("found space");
+        },
+        x => {
+            scanlines[row][stack] = x
+        }
+    }
+    if buffer[1] == b' ' {
     }
     handle = stream.take(1);
     handle.read(&mut buffer).unwrap();
     println!("{}", buffer[0]);
     match buffer[0] {
-        b'\n' => println!("newline"),
+        b'\n' => {
+            
+            println!("newline");
+        },
         b' ' => println!("space"),
         _ => panic!("parse could not match expected character"),
     }
