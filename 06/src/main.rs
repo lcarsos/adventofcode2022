@@ -5,6 +5,7 @@ fn signal_lock_on(stream: &Vec<u8>) -> Option<usize> {
     for sop in 3..stream.len() {
         // https://stackoverflow.com/questions/39803237/build-hashset-from-a-vector-in-rust
         // works on the whole array, but I just want a slice
+        // sidenote: apparently stream[sop-3..sop] size is not known at compile time
         let sequence = stream.get(sop-3..sop).unwrap();
         //println!("test: {}", sequence.to_string());
         let mut test = HashSet::<u8>::from_iter(sequence.cloned());
