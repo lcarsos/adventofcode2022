@@ -1,17 +1,32 @@
 use std::io::{stdin, Read, BufRead, BufReader};
 use regex::Regex;
 
+type Depot = Vec<Vec<char>>;
+
 struct Instruction {
-    count: u64,
-    from: u64,
-    to: u64,
+    count: usize,
+    from: usize,
+    to: usize,
 }
 
-fn print_depot(&depot) {
-
+fn print_depot(depot: &Depot) {
+    for (i, stack) in depot.iter().enumerate() {
+        print!("{} |", i+1);
+        for j in stack.iter() {
+            print!(" {j}");
+        }
+        print!("\n");
+    }
 }
 
-fn parse_crates<R>(stream: &mut R) -> Option<Vec<Vec<char>>>
+fn print_depot_top(depot: &Depot) {
+    for i in depot.iter() {
+        print!("{}", i.last().unwrap());
+    }
+    print!("\n");
+}
+
+fn parse_crates<R>(stream: &mut R) -> Option<Depot>
 where
     R: BufRead,
 {
@@ -73,15 +88,14 @@ where
     // probably not the most efficient matrix mirroring in the world
     // but this does prune the empties
     let mut depot: Vec<Vec<char>> = Vec::new();
-    depot.push(Vec::new());
     for stack in 0..scanlines[0].len() {
+        depot.push(Vec::new());
         for row in scanlines.iter().rev() {
             match row[stack] {
                 Some(x) => depot.last_mut().unwrap().push(x),
                 _ => {},
             }
         }
-        depot.push(Vec::new());
     }
 
     //println!("\nstack");
@@ -105,20 +119,21 @@ fn main() {
     raw_instructions.next();
 
     let move_parser = Regex::new(r"move (\d+) from (\d+) to (\d+)").unwrap();
-    {
-        let line = raw_instructions.next().unwrap();
-    //for line in raw_instructions {
+    for line in raw_instructions {
         let unline = line.unwrap();
         let m = move_parser.captures(&unline).unwrap();
         let inst = Instruction {
+            // I really wanted to pull out these 3 and do this in a comprehension
+            // But I'm too stupid I guess to figure that out
             count: m.get(1).unwrap().as_str().parse().unwrap(),
-            from:  m.get(2).unwrap().as_str().parse().unwrap(),
-            to:    m.get(3).unwrap().as_str().parse().unwrap(),
+            from:  m.get(2).unwrap().as_str().parse::<usize>().unwrap() - 1,
+            to:    m.get(3).unwrap().as_str().parse::<usize>().unwrap() - 1,
         };
-        println!("({}, {}, {})", inst.count, inst.from, inst.to);
         for _ in 0..inst.count {
-            depot[inst.to].push(depot[inst.from].pop());
+            let from = depot[inst.from].pop().unwrap();
+            depot[inst.to].push(from);
         }
     }
+    print_depot_top(&depot);
 
 }
