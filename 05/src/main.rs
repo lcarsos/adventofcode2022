@@ -1,5 +1,15 @@
-use std::io::{stdin, Read, BufRead, BufReader, Take};
+use std::io::{stdin, Read, BufRead, BufReader};
 use regex::Regex;
+
+struct Instruction {
+    count: u64,
+    from: u64,
+    to: u64,
+}
+
+fn print_depot(&depot) {
+
+}
 
 fn parse_crates<R>(stream: &mut R) -> Option<Vec<Vec<char>>>
 where
@@ -19,6 +29,8 @@ where
             digit_re.is_match(&(buffer[1] as char).to_string())
         {
             //println!("breaking");
+            // every time we read in a newline we push a new vec
+            // but the last vec is unnecessary so we pop it off
             scanlines.pop();
             break;
         }
@@ -80,9 +92,33 @@ where
     return Some(depot);
 }
 
+fn print_type_of<T>(_: &T) {
+    println!("{}", std::any::type_name::<T>());
+}
+
 fn main() {
-    let mut depot = parse_crates(&mut stdin().lock()).unwrap();
-    //for line in stdin().lock().lines() {
-    //}
-    println!("Hello, world!");
+    let stream = stdin();
+    let mut foo = stream.lock();
+    let mut depot = parse_crates(&mut foo).unwrap();
+    let mut raw_instructions = foo.lines();
+    raw_instructions.next();
+    raw_instructions.next();
+
+    let move_parser = Regex::new(r"move (\d+) from (\d+) to (\d+)").unwrap();
+    {
+        let line = raw_instructions.next().unwrap();
+    //for line in raw_instructions {
+        let unline = line.unwrap();
+        let m = move_parser.captures(&unline).unwrap();
+        let inst = Instruction {
+            count: m.get(1).unwrap().as_str().parse().unwrap(),
+            from:  m.get(2).unwrap().as_str().parse().unwrap(),
+            to:    m.get(3).unwrap().as_str().parse().unwrap(),
+        };
+        println!("({}, {}, {})", inst.count, inst.from, inst.to);
+        for _ in 0..inst.count {
+            depot[inst.to].push(depot[inst.from].pop());
+        }
+    }
+
 }
