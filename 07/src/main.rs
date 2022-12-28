@@ -1,6 +1,9 @@
 use std::rc::Rc;
+use std::cell::RefCell;
 use std::io::{stdin, BufRead};
 use regex::Regex;
+
+type RcINode = Rc<RefCell<INode>>;
 
 enum FileType {
     Directory,
@@ -8,27 +11,27 @@ enum FileType {
 }
 
 struct INode {
-    parent: Option<Rc<INode>>,
+    parent: Option<RcINode>,
     name: String,
     kind: FileType,
     size: usize,
-    children: Vec<INode>,
+    children: Vec<RcINode>,
 }
 
-fn parse_file_tree<T>(stream: &mut T) -> Option<Box<INode>>
+fn parse_file_tree<T>(stream: &mut T) -> Option<RcINode>
 where
     T: BufRead,
 {
     let command_regex: Regex = Regex::new(r"\$ ([[:alpha:]]+) ([[:alpha:]]+)").ok()?;
 
-    let tree: Box<INode> = Box::new(INode {
+    let tree: RcINode = Rc::new(RefCell::new(INode {
         parent: None,
-        name: "/".to_string(),
+        name: String::from("/"),
         kind: FileType::Directory,
         size: 0,
         children: Vec::new(),
-    });
-    let mut cursor: Rc<INode>;
+    }));
+    let mut cursor: RcINode;
     for line_res in stream.lines() {
         let line = line_res.ok()?;
         if command_regex.is_match(&line) {
@@ -37,9 +40,10 @@ where
                 "cd" => {
                     let directory = cap.get(2)?.as_str();
                     match directory {
-                        "/" => cursor = Rc::new(*tree),
-                        ".." => cursor = Rc::clone(&cursor.parent?),
-                        dir => cursor = Rc::new(cursor.children.iter().find(|&x| x.name == dir ).unwrap()),
+                        "/" => cursor = Rc::clone(&tree),
+                        ".." => cursor = Rc::clone(&cursor.borrow().parent?),
+                        //dir => cursor = Rc::clone(&*cursor.borrow().children.iter().find(|&x| x.name == dir ).unwrap()),
+                        _ => todo!(),
                     }
                 },
                 _ => todo!(),
