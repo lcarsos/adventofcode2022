@@ -5,6 +5,11 @@ use regex::Regex;
 
 type RcINode = Rc<RefCell<INode>>;
 
+enum Command {
+    ChangeDir,
+    List,
+}
+
 enum FileType {
     Directory,
     File,
@@ -33,6 +38,7 @@ where
     }));
     let mut cursor: RcINode;
     for line_res in stream.lines() {
+        parse_command(Rc::clone(&tree), line_res
         let line = line_res.ok()?;
         if command_regex.is_match(&line) {
             let cap = command_regex.captures(&line)?;
@@ -52,6 +58,14 @@ where
     }
     None
 }
+
+fn parse_command<T>(current: RcINode, stream: &mut T) -> RcINode
+where
+    T: BufRead
+{
+}
+
+
 
 fn main() {
     let mut stream = stdin().lock();
